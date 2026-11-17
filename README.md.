@@ -1,0 +1,55 @@
+# 📚 Live AI Vision Tutor
+
+> A real-time, browser-based AI private tutor that uses your phone's camera and voice to guide you through homework step-by-step—**without spoiling the final answer.**
+
+![App Banner or Demo](https://img.shields.io/badge/Status-Active%20Prototype-brightgreen) ![Cost](https://img.shields.io/badge/Cost-%240-blue) ![Powered By](https://img.shields.io/badge/Gemini-2.5%20Flash-orange)
+
+---
+
+## 💡 Why This Exists
+Most AI homework helpers encourage cheating by instantly spitting out the final answer. **Live AI Vision Tutor** acts like a real human teacher: it looks at your notebook via your live camera feed, catches your exact calculation mistakes, and asks **Socratic guiding questions** to help you figure out the next step yourself.
+
+## ✨ Key Features
+* **👀 Live Vision:** Point your phone camera or webcam at your textbook or handwritten math problems.
+* **🗣️ Voice-Activated:** Speak naturally to the tutor using browser voice recognition; it talks back using text-to-speech.
+* **🚫 Anti-Cheat Logic:** System instructions force the AI to *never* give direct answers—only hints and error-checking.
+* **💸 100% Free Stack:** Built using browser APIs and Google AI Studio's free tier. No server costs or paid subscriptions required.
+
+---
+
+## 🛠️ Tech Stack
+* **Frontend:** Vanilla HTML5, CSS3, JavaScript
+* **AI Brain:** Google Gemini API (`gemini-2.5-flash`) via REST
+* **Vision:** HTML5 MediaDevices API (`navigator.mediaDevices.getUserMedia`)
+* **Ears & Voice:** Web Speech API & SpeechSynthesis
+* **Hosting:** GitHub Pages (HTTPS secured)
+
+---
+
+## 🚀 How to Run It Yourself (Locally or Deployed)
+
+1. **Get a Free API Key:**
+   * Head over to [Google AI Studio](https://aistudio.google.com).
+   * Create a free API key.
+
+2. **Clone or Copy:**
+   * Download or copy the `index.html` file from this repository.
+
+3. **Open & Test:**
+   * Open `index.html` in any modern mobile browser (Chrome/Safari).
+   * Enter your Gemini API key in the password field.
+   * Allow camera and microphone permissions, point at your homework, and start talking!
+
+---
+
+## 🗺️ Roadmap
+- [ ] Add support for multiple local school curricula (e.g., CAPS, Common Core).
+- [ ] Implement a "Reverse Mode" where the student has to explain the concept back to the AI.
+- [ ] Add session history tracking to review past solved problems.
+
+---
+
+## 👤 Author
+Built by a 15-year-old developer passionate about making quality education accessible to everyone. 
+
+*If you find this useful or want to collaborate, feel free to star ⭐ this repository!*
