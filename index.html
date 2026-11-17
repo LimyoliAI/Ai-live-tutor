@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Live AI Vision Tutor</title>
+  <style>
+    body { font-family: sans-serif; background: #111; color: #fff; text-align: center; margin: 0; padding: 15px; }
+    video { width: 100%; max-width: 400px; border-radius: 12px; border: 2px solid #4ade80; background: #000; }
+    button { background: #4ade80; color: #000; border: none; padding: 15px 25px; font-size: 18px; font-weight: bold; border-radius: 50px; margin-top: 15px; cursor: pointer; width: 90%; max-width: 350px; }
+    button:active { background: #22c55e; }
+    #status { margin-top: 15px; font-size: 16px; color: #a3e635; min-height: 24px; }
+    #reply { margin-top: 15px; background: #222; padding: 15px; border-radius: 10px; font-size: 15px; line-height: 1.4; text-align: left; }
+    input { padding: 10px; width: 85%; max-width: 340px; border-radius: 8px; border: none; margin-bottom: 10px; }
+  </style>
+</head>
+<body>
+
+  <h2>📚 Live AI Tutor</h2>
+  <input type="password" id="apiKey" placeholder="Paste your Gemini API Key here">
+  
+  <video id="camera" autoplay playsinline></video>
+  <canvas id="canvas" style="display:none;"></canvas>
+
+  <button id="talkBtn">🎤 Hold or Tap to Ask Tutor</button>
+  <div id="status">Point camera at your book & tap button</div>
+  <div id="reply">Your tutor's step-by-step hints will appear and speak here...</div>
+
+  <script>
+    const video = document.getElementById('camera');
+    const canvas = document.getElementById('canvas');
+    const talkBtn = document.getElementById('talkBtn');
+    const statusDiv = document.getElementById('status');
+    const replyDiv = document.getElementById('reply');
+
+    // 1. Start Back Camera
+    navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" }, audio: false })
+      .then(stream => { video.srcObject = stream; })
+      .catch(err => { statusDiv.innerText = "Camera error: Please allow camera access."; });
+
+    // 2. Setup Speech Recognition (Ears)
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    const recognition = new SpeechRecognition();
+    recognition.lang = 'en-US';
+
+    talkBtn.onclick = () => {
+      const key = document.getElementById('apiKey').value.trim();
+      if (!key) { alert("Please paste your Gemini API key first!"); return; }
+      statusDiv.innerText = "Listening... Speak your question now!";
+      recognition.start();
+    };
+
+    recognition.onresult = async (event) => {
+      const spokenText = event.results[0][0].transcript;
+      statusDiv.innerText = `You asked: "${spokenText}" — Thinking...`;
+
+      // 3. Snap Photo of the Book/Paper
+      canvas.width = video.videoWidth;
+      canvas.height = video.videoHeight;
+      canvas.getContext('2d').drawImage(video, 0, 0);
+      const base64Image = canvas.toDataURL('image/jpeg', 0.7).split(',')[1];
+
+      // 4. Send Image + Voice to Gemini
+      const apiKey = document.getElementById('apiKey').value.trim();
+      const systemRule = "You are a warm, encouraging private tutor. Look at the student's book or paper in the image. NEVER give the final answer directly. Check if they made a mistake in their work so far, explain the concept simply, and ask ONE short guiding question for the very next step. Keep your response under 3 sentences so it is easy to listen to.";
+
+      try {
+        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            contents: [{
+              parts: [
+                { text: `${systemRule}\n\nStudent says: "${spokenText}"` },
+                { inline_data: { mime_type: "image/jpeg", data: base64Image } }
+              ]
+            }]
+          })
+        });
+
+        const data = await response.json();
+        const tutorReply = data.candidates[0].content.parts[0].text;
+        
+        replyDiv.innerText = tutorReply;
+        statusDiv.innerText = "Tap button when ready for the next step!";
+
+        // 5. Speak the Answer Out Loud (Voice)
+        const speech = new SpeechSynthesisUtterance(tutorReply);
+        window.speechSynthesis.speak(speech);
+
+      } catch (error) {
+        statusDiv.innerText = "Error talking to AI. Check your API key.";
+      }
+    };
+  </script>
+</body>
+</html>
